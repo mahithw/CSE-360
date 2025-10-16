@@ -1,186 +1,187 @@
 package entityClasses;
 
-import entityClasses.Reply;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * <p>Title: ReplyCollection Class</p>
+ * <p>Title: PostCollection Class</p>
  * 
- * <p>Description: Manages a collection of Reply objects with full CRUD operations
- * and search/filter capabilities. This class supports storing all replies in the
+ * <p>Description: Manages a collection of Post objects with full CRUD operations
+ * and search/filter capabilities. This class supports storing all posts in the
  * system as well as creating and managing subsets based on various criteria.</p>
  * 
  * <p>Copyright: Student Discussion System © 2025</p>
  * 
  * @author Your Name
- * @version 1.00 2025-01-15 Initial implementation
+ * @version 1.00 2025-10-16 Initial implementation for HW2
  */
 public class PostCollection {
     
-    // The main storage for all replies
-    private List<Reply> replies;
+    // The main storage for all posts
+    private List<Post> posts;
     
     /**
      * Default constructor - creates an empty collection
      */
     public PostCollection() {
-        this.replies = new ArrayList<>();
+        this.posts = new ArrayList<>();
     }
     
     /**
-     * Constructor that accepts an initial list of replies
+     * Constructor that accepts an initial list of posts
      * This is useful for creating subsets
      * 
-     * @param replies Initial list of replies
+     * @param posts Initial list of posts
      */
-    public PostCollection(List<Reply> replies) {
-        this.replies = new ArrayList<>(replies);
+    public PostCollection(List<Post> posts) {
+        this.posts = new ArrayList<>(posts);
     }
     
     // ==================== CREATE ====================
     
     /**
-     * Adds a new reply to the collection
+     * Adds a new post to the collection
      * 
-     * @param reply The reply to add
-     * @return true if reply was added successfully
-     * @throws IllegalArgumentException if reply is null or already exists
+     * @param post The post to add
+     * @return true if post was added successfully
+     * @throws IllegalArgumentException if post is null or already exists
      */
-    public boolean addReply(Reply reply) {
-        if (reply == null) {
+    public boolean addPost(Post post) {
+        if (post == null) {
             throw new IllegalArgumentException(
-                "Cannot add a null reply to the collection.");
+                "Cannot add a null post to the collection.");
         }
         
-        // Check if reply with same ID already exists
-        if (findReplyById(reply.getReplyId()) != null) {
+        // Check if post with same ID already exists
+        if (findPostById(post.getPostId()) != null) {
             throw new IllegalArgumentException(
-                "A reply with ID " + reply.getReplyId() + " already exists.");
+                "A post with ID " + post.getPostId() + " already exists.");
         }
         
-        return replies.add(reply);
+        return posts.add(post);
     }
     
     /**
-     * Creates and adds a new reply with the given parameters
+     * Creates and adds a new post with the given parameters
      * 
-     * @param postId The ID of the post being replied to
      * @param authorUsername The author's username
-     * @param content The reply content
-     * @return The newly created Reply object
+     * @param title The post title
+     * @param content The post content
+     * @param thread The thread category
+     * @return The newly created Post object
      * @throws IllegalArgumentException if validation fails
      */
-    public Reply createReply(String postId, String authorUsername, String content) {
-        Reply reply = new Reply(postId, authorUsername, content);
-        addReply(reply);
-        return reply;
+    public Post createPost(String authorUsername, String title, 
+                          String content, String thread) {
+        Post post = new Post(authorUsername, title, content, thread);
+        addPost(post);
+        return post;
     }
     
     // ==================== READ ====================
     
     /**
-     * Retrieves all replies in the collection
+     * Retrieves all posts in the collection
      * 
-     * @return A list of all replies (including deleted ones)
+     * @return A list of all posts (including deleted ones)
      */
-    public List<Reply> getAllReplies() {
-        return new ArrayList<>(replies);
+    public List<Post> getAllPosts() {
+        return new ArrayList<>(posts);
     }
     
     /**
-     * Retrieves all active (non-deleted) replies
+     * Retrieves all active (non-deleted) posts
      * 
-     * @return A list of active replies
+     * @return A list of active posts
      */
-    public List<Reply> getActiveReplies() {
-        return replies.stream()
-                     .filter(reply -> !reply.isDeleted())
-                     .collect(Collectors.toList());
+    public List<Post> getActivePosts() {
+        return posts.stream()
+                   .filter(post -> !post.isDeleted())
+                   .collect(Collectors.toList());
     }
     
     /**
-     * Finds a reply by its unique ID
+     * Finds a post by its unique ID
      * 
-     * @param replyId The ID to search for
-     * @return The Reply object if found, null otherwise
+     * @param postId The ID to search for
+     * @return The Post object if found, null otherwise
      */
-    public Reply findReplyById(String replyId) {
-        if (replyId == null || replyId.trim().isEmpty()) {
+    public Post findPostById(String postId) {
+        if (postId == null || postId.trim().isEmpty()) {
             return null;
         }
         
-        return replies.stream()
-                     .filter(reply -> reply.getReplyId().equals(replyId))
-                     .findFirst()
-                     .orElse(null);
+        return posts.stream()
+                   .filter(post -> post.getPostId().equals(postId))
+                   .findFirst()
+                   .orElse(null);
     }
     
     /**
-     * Retrieves all replies to a specific post
+     * Retrieves all posts in a specific thread
      * 
-     * @param postId The post ID to search for
-     * @return A ReplyCollection containing replies to that post
+     * @param thread The thread name to search for
+     * @return A PostCollection containing posts in that thread
      */
-    public PostCollection getRepliesByPostId(String postId) {
-        if (postId == null || postId.trim().isEmpty()) {
+    public PostCollection getPostsByThread(String thread) {
+        if (thread == null || thread.trim().isEmpty()) {
             return new PostCollection();
         }
         
-        List<Reply> postReplies = replies.stream()
-            .filter(reply -> reply.getPostId().equals(postId.trim()))
+        List<Post> threadPosts = posts.stream()
+            .filter(post -> post.getThread().equalsIgnoreCase(thread.trim()))
             .collect(Collectors.toList());
         
-        return new PostCollection(postReplies);
+        return new PostCollection(threadPosts);
     }
     
     /**
-     * Retrieves all active replies to a specific post
+     * Retrieves all active posts in a specific thread
      * 
-     * @param postId The post ID to search for
-     * @return A ReplyCollection containing active replies to that post
+     * @param thread The thread name to search for
+     * @return A PostCollection containing active posts in that thread
      */
-    public PostCollection getActiveRepliesByPostId(String postId) {
-        if (postId == null || postId.trim().isEmpty()) {
+    public PostCollection getActivePostsByThread(String thread) {
+        if (thread == null || thread.trim().isEmpty()) {
             return new PostCollection();
         }
         
-        List<Reply> postReplies = replies.stream()
-            .filter(reply -> reply.getPostId().equals(postId.trim()))
-            .filter(reply -> !reply.isDeleted())
+        List<Post> threadPosts = posts.stream()
+            .filter(post -> post.getThread().equalsIgnoreCase(thread.trim()))
+            .filter(post -> !post.isDeleted())
             .collect(Collectors.toList());
         
-        return new PostCollection(postReplies);
+        return new PostCollection(threadPosts);
     }
     
     /**
-     * Retrieves all replies by a specific author
+     * Retrieves all posts by a specific author
      * 
      * @param username The author's username
-     * @return A ReplyCollection containing the author's replies
+     * @return A PostCollection containing the author's posts
      */
-    public PostCollection getRepliesByAuthor(String username) {
+    public PostCollection getPostsByAuthor(String username) {
         if (username == null || username.trim().isEmpty()) {
             return new PostCollection();
         }
         
-        List<Reply> authorReplies = replies.stream()
-            .filter(reply -> reply.getAuthorUsername()
-                                 .equalsIgnoreCase(username.trim()))
+        List<Post> authorPosts = posts.stream()
+            .filter(post -> post.getAuthorUsername()
+                               .equalsIgnoreCase(username.trim()))
             .collect(Collectors.toList());
         
-        return new PostCollection(authorReplies);
+        return new PostCollection(authorPosts);
     }
     
     /**
-     * Searches for replies containing specific keywords
+     * Searches for posts containing specific keywords in title or content
      * 
      * @param keyword The keyword to search for
-     * @return A ReplyCollection containing matching replies
+     * @return A PostCollection containing matching posts
      * @throws IllegalArgumentException if keyword is invalid
      */
-    public PostCollection searchReplies(String keyword) {
+    public PostCollection searchPosts(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             throw new IllegalArgumentException(
                 "Search keyword cannot be null or empty.");
@@ -192,201 +193,235 @@ public class PostCollection {
         }
         
         final String searchTerm = keyword.trim().toLowerCase();
-        List<Reply> matchingReplies = replies.stream()
-            .filter(reply -> !reply.isDeleted())
-            .filter(reply -> 
-                reply.getContent().toLowerCase().contains(searchTerm))
+        List<Post> matchingPosts = posts.stream()
+            .filter(post -> !post.isDeleted())
+            .filter(post -> 
+                post.getTitle().toLowerCase().contains(searchTerm) ||
+                post.getContent().toLowerCase().contains(searchTerm))
             .collect(Collectors.toList());
         
-        return new PostCollection(matchingReplies);
+        return new PostCollection(matchingPosts);
     }
     
     /**
-     * Counts the number of replies to a specific post
+     * Counts the number of posts in the collection
      * 
-     * @param postId The post ID
-     * @return The number of replies (including deleted)
+     * @return The number of posts (including deleted)
      */
-    public int countRepliesForPost(String postId) {
-        if (postId == null || postId.trim().isEmpty()) {
-            return 0;
-        }
-        
-        return (int) replies.stream()
-                           .filter(reply -> reply.getPostId().equals(postId))
-                           .count();
+    public int countAllPosts() {
+        return posts.size();
     }
     
     /**
-     * Counts the number of active replies to a specific post
+     * Counts the number of active posts
      * 
-     * @param postId The post ID
-     * @return The number of active replies
+     * @return The number of active posts
      */
-    public int countActiveRepliesForPost(String postId) {
-        if (postId == null || postId.trim().isEmpty()) {
+    public int countActivePosts() {
+        return (int) posts.stream()
+                         .filter(post -> !post.isDeleted())
+                         .count();
+    }
+    
+    /**
+     * Counts posts in a specific thread
+     * 
+     * @param thread The thread name
+     * @return The number of posts in that thread
+     */
+    public int countPostsInThread(String thread) {
+        if (thread == null || thread.trim().isEmpty()) {
             return 0;
         }
         
-        return (int) replies.stream()
-                           .filter(reply -> reply.getPostId().equals(postId))
-                           .filter(reply -> !reply.isDeleted())
-                           .count();
+        return (int) posts.stream()
+                         .filter(post -> post.getThread()
+                                            .equalsIgnoreCase(thread.trim()))
+                         .count();
     }
     
     // ==================== UPDATE ====================
     
     /**
-     * Updates an existing reply's content
+     * Updates an existing post's title
      * 
-     * @param replyId The ID of the reply to update
+     * @param postId The ID of the post to update
+     * @param newTitle The new title
+     * @return true if update was successful
+     * @throws IllegalArgumentException if post not found or validation fails
+     */
+    public boolean updatePostTitle(String postId, String newTitle) {
+        Post post = findPostById(postId);
+        
+        if (post == null) {
+            throw new IllegalArgumentException(
+                "Post with ID " + postId + " not found.");
+        }
+        
+        if (post.isDeleted()) {
+            throw new IllegalArgumentException(
+                "Cannot update a deleted post.");
+        }
+        
+        post.setTitle(newTitle);
+        return true;
+    }
+    
+    /**
+     * Updates an existing post's content
+     * 
+     * @param postId The ID of the post to update
      * @param newContent The new content
      * @return true if update was successful
-     * @throws IllegalArgumentException if reply not found or validation fails
+     * @throws IllegalArgumentException if post not found or validation fails
      */
-    public boolean updateReplyContent(String replyId, String newContent) {
-        Reply reply = findReplyById(replyId);
+    public boolean updatePostContent(String postId, String newContent) {
+        Post post = findPostById(postId);
         
-        if (reply == null) {
+        if (post == null) {
             throw new IllegalArgumentException(
-                "Reply with ID " + replyId + " not found.");
+                "Post with ID " + postId + " not found.");
         }
         
-        if (reply.isDeleted()) {
+        if (post.isDeleted()) {
             throw new IllegalArgumentException(
-                "Cannot update a deleted reply.");
+                "Cannot update a deleted post.");
         }
         
-        reply.setContent(newContent);
+        post.setContent(newContent);
+        return true;
+    }
+    
+    /**
+     * Updates an existing post's thread
+     * 
+     * @param postId The ID of the post to update
+     * @param newThread The new thread
+     * @return true if update was successful
+     * @throws IllegalArgumentException if post not found or validation fails
+     */
+    public boolean updatePostThread(String postId, String newThread) {
+        Post post = findPostById(postId);
+        
+        if (post == null) {
+            throw new IllegalArgumentException(
+                "Post with ID " + postId + " not found.");
+        }
+        
+        if (post.isDeleted()) {
+            throw new IllegalArgumentException(
+                "Cannot update a deleted post.");
+        }
+        
+        post.setThread(newThread);
         return true;
     }
     
     // ==================== DELETE ====================
     
     /**
-     * Soft deletes a reply (marks as deleted but keeps in collection)
+     * Soft deletes a post (marks as deleted but keeps in collection)
      * 
-     * @param replyId The ID of the reply to delete
+     * @param postId The ID of the post to delete
      * @return true if deletion was successful
-     * @throws IllegalArgumentException if reply not found
+     * @throws IllegalArgumentException if post not found
      */
-    public boolean deleteReply(String replyId) {
-        Reply reply = findReplyById(replyId);
+    public boolean deletePost(String postId) {
+        Post post = findPostById(postId);
         
-        if (reply == null) {
+        if (post == null) {
             throw new IllegalArgumentException(
-                "Reply with ID " + replyId + " not found.");
+                "Post with ID " + postId + " not found.");
         }
         
-        if (reply.isDeleted()) {
+        if (post.isDeleted()) {
             throw new IllegalArgumentException(
-                "Reply is already deleted.");
+                "Post is already deleted.");
         }
         
-        reply.markAsDeleted();
+        post.markAsDeleted();
         return true;
     }
     
     /**
-     * Permanently removes a reply from the collection
+     * Permanently removes a post from the collection
      * Use with caution - this cannot be undone
      * 
-     * @param replyId The ID of the reply to remove
+     * @param postId The ID of the post to remove
      * @return true if removal was successful
-     * @throws IllegalArgumentException if reply not found
+     * @throws IllegalArgumentException if post not found
      */
-    public boolean permanentlyRemoveReply(String replyId) {
-        Reply reply = findReplyById(replyId);
+    public boolean permanentlyRemovePost(String postId) {
+        Post post = findPostById(postId);
         
-        if (reply == null) {
+        if (post == null) {
             throw new IllegalArgumentException(
-                "Reply with ID " + replyId + " not found.");
+                "Post with ID " + postId + " not found.");
         }
         
-        return replies.remove(reply);
+        return posts.remove(post);
     }
     
     /**
-     * Deletes all replies associated with a specific post
-     * Useful when a post is deleted
+     * Restores a previously deleted post
      * 
-     * @param postId The post ID
-     * @return The number of replies deleted
-     */
-    public int deleteRepliesForPost(String postId) {
-        if (postId == null || postId.trim().isEmpty()) {
-            return 0;
-        }
-        
-        List<Reply> postReplies = replies.stream()
-            .filter(reply -> reply.getPostId().equals(postId))
-            .filter(reply -> !reply.isDeleted())
-            .collect(Collectors.toList());
-        
-        postReplies.forEach(Reply::markAsDeleted);
-        return postReplies.size();
-    }
-    
-    /**
-     * Restores a previously deleted reply
-     * 
-     * @param replyId The ID of the reply to restore
+     * @param postId The ID of the post to restore
      * @return true if restoration was successful
-     * @throws IllegalArgumentException if reply not found
+     * @throws IllegalArgumentException if post not found
      */
-    public boolean restoreReply(String replyId) {
-        Reply reply = findReplyById(replyId);
+    public boolean restorePost(String postId) {
+        Post post = findPostById(postId);
         
-        if (reply == null) {
+        if (post == null) {
             throw new IllegalArgumentException(
-                "Reply with ID " + replyId + " not found.");
+                "Post with ID " + postId + " not found.");
         }
         
-        if (!reply.isDeleted()) {
+        if (!post.isDeleted()) {
             throw new IllegalArgumentException(
-                "Reply is not deleted and cannot be restored.");
+                "Post is not deleted and cannot be restored.");
         }
         
-        reply.restore();
+        post.restore();
         return true;
     }
     
     // ==================== UTILITY METHODS ====================
     
     /**
-     * Gets the total number of replies in the collection
+     * Gets the total number of posts in the collection
      * 
      * @return The total count
      */
     public int size() {
-        return replies.size();
+        return posts.size();
     }
     
     /**
-     * Gets the number of active (non-deleted) replies
+     * Gets the number of active (non-deleted) posts
      * 
-     * @return The count of active replies
+     * @return The count of active posts
      */
-    public int activeReplyCount() {
-        return (int) replies.stream()
-                           .filter(reply -> !reply.isDeleted())
-                           .count();
+    public int activePostCount() {
+        return (int) posts.stream()
+                         .filter(post -> !post.isDeleted())
+                         .count();
     }
     
     /**
      * Checks if the collection is empty
      * 
-     * @return true if no replies exist
+     * @return true if no posts exist
      */
     public boolean isEmpty() {
-        return replies.isEmpty();
+        return posts.isEmpty();
     }
     
     /**
-     * Clears all replies from the collection
+     * Clears all posts from the collection
      */
     public void clear() {
-        replies.clear();
+        posts.clear();
     }
     
     /**
@@ -397,7 +432,7 @@ public class PostCollection {
     @Override
     public String toString() {
         return String.format(
-            "ReplyCollection[Total=%d, Active=%d, Deleted=%d]",
-            size(), activeReplyCount(), size() - activeReplyCount());
+            "PostCollection[Total=%d, Active=%d, Deleted=%d]",
+            size(), activePostCount(), size() - activePostCount());
     }
 }

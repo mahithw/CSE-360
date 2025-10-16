@@ -49,6 +49,13 @@ public class ControllerMultipleRoleDispatch {
 					guiMultipleRoleDispatch.ViewMultipleRoleDispatch.theStage, 
 					guiMultipleRoleDispatch.ViewMultipleRoleDispatch.theUser);
 			
+		} else if (role.compareTo("Student") == 0) {
+			
+			// It is Student Role
+			guiStudentHome.ViewStudentHome.displayStudentHome(
+					guiMultipleRoleDispatch.ViewMultipleRoleDispatch.theStage, 
+					guiMultipleRoleDispatch.ViewMultipleRoleDispatch.theUser);
+			
 		} else {
 			// Invalid role
 			System.out.println("*** ERROR *** GUIMultipleRoleDispatch was asked to dispatch to " +

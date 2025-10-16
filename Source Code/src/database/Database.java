@@ -58,6 +58,7 @@ public class Database {
 	private boolean currentAdminRole;
 	private boolean currentNewRole1;
 	private boolean currentNewRole2;
+	private boolean currentNewStudent;
 
 	/*******
 	 * <p> Method: Database </p>
@@ -218,6 +219,9 @@ public class Database {
 			
 			currentNewRole2 = user.getNewRole2();
 			pstmt.setBoolean(10, currentNewRole2);
+			
+			currentNewStudent = user.getNewStudent();
+			pstmt.setBoolean(11, currentNewStudent);
 			
 			pstmt.executeUpdate();
 		}
@@ -963,6 +967,7 @@ public class Database {
 	    	currentAdminRole = rs.getBoolean(9);
 	    	currentNewRole1 = rs.getBoolean(10);
 	    	currentNewRole2 = rs.getBoolean(11);
+	    	currentNewStudent = rs.getBoolean(12);
 			return true;
 	    } catch (SQLException e) {
 			return false;
@@ -1032,6 +1037,23 @@ public class Database {
 				return false;
 			}
 		}
+		
+		if (role.compareTo("Student") == 0) {
+			String query = "UPDATE userDB SET newRole1 = ? WHERE username = ?";
+			try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+				pstmt.setString(1, value);
+				pstmt.setString(2, username);
+				pstmt.executeUpdate();
+				if (value.compareTo("true") == 0)
+					currentNewStudent = true;
+				else
+					currentNewStudent = false;
+				return true;
+			} catch (SQLException e) {
+				return false;
+			}
+		}
+		
 		return false;
 	}
 	
@@ -1097,7 +1119,7 @@ public class Database {
 	public java.util.List<entityClasses.User> getAllUsersDetailed() {
 	    java.util.List<entityClasses.User> list = new java.util.ArrayList<>();
 	    final String sql = "SELECT userName, password, firstName, middleName, lastName, " +
-	            "preferredFirstName, emailAddress, adminRole, newRole1, newRole2 FROM userDB";
+	            "preferredFirstName, emailAddress, adminRole, newRole1, newRole2, newStudent FROM userDB";
 	    
 	    try (java.sql.PreparedStatement ps = connection.prepareStatement(sql);
 	         java.sql.ResultSet rs = ps.executeQuery()) {
@@ -1113,9 +1135,10 @@ public class Database {
 	            boolean rAdmin = rs.getBoolean("adminRole");
 	            boolean r1 = rs.getBoolean("newRole1");
 	            boolean r2 = rs.getBoolean("newRole2");
+	            boolean r3 = rs.getBoolean("Student");
 	            
 	            entityClasses.User u = new entityClasses.User(
-	                userName, password, fn, mn, ln, pfn, email, rAdmin, r1, r2
+	                userName, password, fn, mn, ln, pfn, email, rAdmin, r1, r2, r3
 	            );
 	            list.add(u);
 	        }
@@ -1234,6 +1257,16 @@ public class Database {
 	 *  
 	 */
 	public boolean getCurrentNewRole2() { return currentNewRole2;};
+	
+	/*******
+	 * <p> Method: boolean getCurrentNewRole2() </p>
+	 * 
+	 * <p> Description: Get the current user's Reviewer role attribute.</p>
+	 * 
+	 * @return true if this user plays a Reviewer role, else false
+	 *  
+	 */
+	public boolean getCurrentNewStudent() { return currentNewStudent;};
 
 	
 	/*******

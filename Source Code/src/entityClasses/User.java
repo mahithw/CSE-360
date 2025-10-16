@@ -28,6 +28,7 @@ public class User {
     private boolean adminRole;
     private boolean role1;
     private boolean role2;
+    private boolean Student;
     
     
     /*****
@@ -59,7 +60,7 @@ public class User {
      */
     // Constructor to initialize a new User object with userName, password, and role.
     public User(String userName, String password, String fn, String mn, String ln, String pfn, 
-    		String ea, boolean r1, boolean r2, boolean r3) {
+    		String ea, boolean r1, boolean r2, boolean r3, boolean r4) {
         this.userName = userName;
         this.password = password;
         this.firstName = fn;
@@ -70,6 +71,7 @@ public class User {
         this.adminRole = r1;
         this.role1 = r2;
         this.role2 = r3;
+        this.Student= r4;
     }
 
     
@@ -112,6 +114,19 @@ public class User {
     // Sets the role2 user.
     public void setRole2User(boolean role) {
     	this.role2=role;
+    }
+    
+    /*****
+     * <p> Method: void setRole2User(boolean role) </p>
+     * 
+     * <p> Description: This setter defines the role2 attribute. </p>
+     * 
+     * @param role is a boolean that specifies if this user in playing role2.
+     * 
+     */
+    // Sets the role2 user.
+    public void setStudentUser(boolean role) {
+    	this.Student=role;
     }
 
     
@@ -241,6 +256,17 @@ public class User {
      */
     // Gets the current value of the role2 attribute.
     public boolean getNewRole2() { return role2; }
+    
+    /*****
+     * <p> Method: String getRole2() </p>
+     * 
+     * <p> Description: This getter returns the value of the role2 attribute. </p>
+     * 
+     * @return a String of "TRUE" or "FALSE" based on state of the attribute
+	 *
+     */
+    // Gets the current value of the role2 attribute.
+    public boolean getNewStudent() { return Student; }
 
         
     /*****
@@ -257,6 +283,7 @@ public class User {
     	if (adminRole) numRoles++;
     	if (role1) numRoles++;
     	if (role2) numRoles++;
+    	if (Student) numRoles++;
     	return numRoles;
     }
 }

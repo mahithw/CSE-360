@@ -184,7 +184,7 @@ public class ControllerFirstAdmin {
 			// Validate username and password
 			if (validateAdminUsername() && validateAdminPassword()) {
 				// Create the user and proceed
-				User user = new User(adminUsername, adminPassword1, "", "", "", "", "", true, false, false);
+				User user = new User(adminUsername, adminPassword1, "", "", "", "", "", true, false, false, false);
 				try {
 					// Create a new User object with admin role and register in the database
 					theDatabase.register(user);
