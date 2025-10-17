@@ -1,71 +1,64 @@
 package entityClasses;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
  * <p>Title: Reply Class</p>
- * 
+ *
  * <p>Description: Represents a reply to a post in the discussion system.
- * This class encapsulates all the data associated with a single reply including
- * content, author information, timestamps, and the parent post reference.</p>
- * 
- * <p>Copyright: Student Discussion System © 2025</p>
- * 
- * @author Your Name
- * @version 1.00 2025-01-15 Initial implementation
+ * This class encapsulates the data associated with a single reply.</p>
+ *
+ * <p>Copyright:
+ * Student Discussion System © 2025</p>
+ *
+ * @version 1.02 — 2025-10-16
+ * Added: getSummary(), originalPostDeleted flag
  */
 public class Reply {
-    
-    // Constants for validation
+
     public static final int MIN_CONTENT_LENGTH = 5;
     public static final int MAX_CONTENT_LENGTH = 3000;
-    
-    // Attributes
-    private String replyId;             // Unique identifier for the reply
-    private String postId;              // ID of the post this replies to
-    private String authorUsername;      // Username of the reply author
-    private String content;             // Content/body of the reply
-    private LocalDateTime createdAt;    // Timestamp when reply was created
-    private LocalDateTime updatedAt;    // Timestamp of last update
-    private boolean isDeleted;          // Soft delete flag
-    
-    /**
-     * Default constructor - creates an empty reply
-     */
+
+    private String replyId;             // 5-char ID with prefix
+    private String postId;
+    private String authorUsername;
+    private String content;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private boolean isDeleted;
+
+    // Optional field for showing message if original post was deleted
+    private boolean originalPostDeleted = false;
+
+    private static final String ID_PREFIX = "R-";
+    private static final java.util.Random RNG = new SecureRandom();
+    private static final char[] ALPHANUM =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+
+    private static String gen5() {
+        char[] b = new char[5];
+        for (int i = 0; i < b.length; i++) b[i] = ALPHANUM[RNG.nextInt(ALPHANUM.length)];
+        return new String(b);
+    }
+
     public Reply() {
-        this.replyId = generateReplyId();
+        this.replyId = ID_PREFIX + gen5();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.isDeleted = false;
+        System.out.println("New Reply ID: " + this.replyId);
     }
-    
-    /**
-     * Parameterized constructor for creating a new reply
-     * 
-     * @param postId The ID of the post being replied to
-     * @param authorUsername The username of the reply author
-     * @param content The content of the reply
-     * @throws IllegalArgumentException if any validation fails
-     */
+
     public Reply(String postId, String authorUsername, String content) {
         this();
         setPostId(postId);
         setAuthorUsername(authorUsername);
         setContent(content);
     }
-    
-    /**
-     * Generates a unique reply ID using timestamp and random component
-     * 
-     * @return A unique reply identifier string
-     */
-    private String generateReplyId() {
-        return "REPLY-" + System.currentTimeMillis() + "-" + 
-               (int)(Math.random() * 10000);
-    }
-    
-    // Getters
+
+    // ===================== GETTERS =====================
     public String getReplyId() { return replyId; }
     public String getPostId() { return postId; }
     public String getAuthorUsername() { return authorUsername; }
@@ -73,127 +66,90 @@ public class Reply {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public boolean isDeleted() { return isDeleted; }
-    
-    /**
-     * Sets the post ID this reply belongs to
-     * 
-     * @param postId The post ID to set
-     * @throws IllegalArgumentException if postId is null or empty
-     */
+    public boolean isOriginalPostDeleted() { return originalPostDeleted; }
+
+    // ===================== SETTERS =====================
     public void setPostId(String postId) {
-        if (postId == null || postId.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                "Post ID cannot be null or empty. A reply must be associated with a post.");
-        }
+        if (postId == null || postId.trim().isEmpty())
+            throw new IllegalArgumentException("Post ID cannot be null or empty.");
         this.postId = postId.trim();
     }
-    
-    /**
-     * Sets the author username with validation
-     * 
-     * @param authorUsername The username to set
-     * @throws IllegalArgumentException if username is null or empty
-     */
+
     public void setAuthorUsername(String authorUsername) {
-        if (authorUsername == null || authorUsername.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                "Author username cannot be null or empty.");
-        }
+        if (authorUsername == null || authorUsername.trim().isEmpty())
+            throw new IllegalArgumentException("Author username cannot be null or empty.");
         this.authorUsername = authorUsername.trim();
     }
-    
-    /**
-     * Sets the reply content with validation
-     * 
-     * @param content The content to set
-     * @throws IllegalArgumentException if content fails validation
-     */
+
     public void setContent(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                "Reply content cannot be null or empty.");
-        }
-        
-        String trimmedContent = content.trim();
-        
-        if (trimmedContent.length() < MIN_CONTENT_LENGTH) {
-            throw new IllegalArgumentException(
-                "Reply content must be at least " + MIN_CONTENT_LENGTH + 
-                " characters long. Please provide a more detailed response.");
-        }
-        
-        if (trimmedContent.length() > MAX_CONTENT_LENGTH) {
-            throw new IllegalArgumentException(
-                "Reply content cannot exceed " + MAX_CONTENT_LENGTH + 
-                " characters. Please be more concise.");
-        }
-        
-        this.content = trimmedContent;
+        if (content == null || content.trim().isEmpty())
+            throw new IllegalArgumentException("Reply content cannot be null or empty.");
+        String trimmed = content.trim();
+        if (trimmed.length() < MIN_CONTENT_LENGTH)
+            throw new IllegalArgumentException("Reply content must be at least " + MIN_CONTENT_LENGTH + " characters.");
+        if (trimmed.length() > MAX_CONTENT_LENGTH)
+            throw new IllegalArgumentException("Reply content cannot exceed " + MAX_CONTENT_LENGTH + " characters.");
+        this.content = trimmed;
         this.updatedAt = LocalDateTime.now();
     }
-    
-    /**
-     * Marks this reply as deleted (soft delete)
-     * This preserves the reply but indicates it's been removed
-     */
+
+    public void setOriginalPostDeleted(boolean flag) {
+        this.originalPostDeleted = flag;
+    }
+
     public void markAsDeleted() {
         this.isDeleted = true;
         this.updatedAt = LocalDateTime.now();
     }
-    
-    /**
-     * Restores a deleted reply
-     */
+
     public void restore() {
         this.isDeleted = false;
         this.updatedAt = LocalDateTime.now();
     }
-    
-    /**
-     * Gets a formatted timestamp string
-     * 
-     * @return Formatted date/time string
-     */
+
     public String getFormattedCreatedAt() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-            "yyyy-MM-dd HH:mm:ss");
-        return createdAt.format(formatter);
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return createdAt.format(f);
     }
-    
-    /**
-     * Gets a formatted timestamp string for last update
-     * 
-     * @return Formatted date/time string
-     */
+
     public String getFormattedUpdatedAt() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-            "yyyy-MM-dd HH:mm:ss");
-        return updatedAt.format(formatter);
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return updatedAt.format(f);
     }
-    
-    /**
-     * Returns a string representation of the reply
-     * 
-     * @return String representation including key fields
-     */
-    @Override
-    public String toString() {
-        return String.format(
-            "Reply[ID=%s, PostID=%s, Author=%s, Deleted=%s]",
-            replyId, postId, authorUsername, isDeleted);
-    }
-    
-    /**
-     * Creates a summary view of the reply for display
-     * 
-     * @return A formatted summary string
+
+    // ===================== SUMMARY =====================
+    /** 
+     * Returns a formatted summary of the reply content for display in alerts.
+     * Shows author, timestamp, and content preview.
      */
     public String getSummary() {
-        String status = isDeleted ? "[DELETED] " : "";
-        String preview = content.length() > 150 ? 
-            content.substring(0, 147) + "..." : content;
-        
-        return String.format("%s%s\nBy: %s | %s",
-            status, preview, authorUsername, getFormattedCreatedAt());
+        if (isDeleted)
+            return "(This reply was deleted.)";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Reply ID: ").append(replyId).append("\n");
+        sb.append("By: ").append(authorUsername).append("\n");
+        sb.append("At: ").append(getFormattedCreatedAt()).append("\n");
+
+        if (originalPostDeleted)
+            sb.append(" Original Post Deleted\n");
+
+        sb.append("\n");
+        String preview = content.length() > 150 ? content.substring(0, 147) + "..." : content;
+        sb.append(preview);
+
+        return sb.toString();
     }
+
+    @Override
+    public String toString() {
+        return String.format("Reply[ID=%s, PostID=%s, Author=%s, Deleted=%s]",
+                replyId, postId, authorUsername, isDeleted);
+    }
+
+    // ===== Setters for DB hydration (package-private) =====
+    void __setReplyId(String id) { this.replyId = id; }
+    void __setCreatedAt(LocalDateTime t) { this.createdAt = t; }
+    void __setUpdatedAt(LocalDateTime t) { this.updatedAt = t; }
+    void __setDeleted(boolean d) { this.isDeleted = d; }
 }

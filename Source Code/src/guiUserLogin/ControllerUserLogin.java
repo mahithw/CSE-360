@@ -125,7 +125,7 @@ public class ControllerUserLogin {
 			} else if (user.getNewStudent()) {
 				loginResult = theDatabase.loginStudent(user);
 				if (loginResult) {
-					guiStudent.ViewStudentHome.displayStudentHome(theStage, user);
+					guiStudentHome.ViewStudentHome.displayStudentHome(theStage, user);
 				}
 				// Other roles
 			} else {

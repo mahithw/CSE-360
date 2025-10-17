@@ -1,19 +1,21 @@
 package guiStudentHome;
 
+import entityClasses.ReplyCollection;
+
 /*******
  * <p> Title: ModelStudentHome Class. </p>
- * 
- * <p> Description: The StudentHome Page Model. This class is not heavily used 
- * as data manipulation is handled by the Post and PostCollection classes.</p>
- * 
+ *
+ * <p> Description: The StudentHome Page Model for HW2. 
+ * This class holds the in-memory ReplyCollection for managing replies 
+ * from the Student UI (non-persistent). </p>
+ *
  * <p> Copyright: Student Discussion System © 2025 </p>
- * 
+ *
  * @author Your Name
- * 
- * @version 1.00		2025-10-16 Initial version for HW2
- *  
+ * @version 1.01 2025-10-16 Add ReplyCollection support for reply UI
  */
-
 public class ModelStudentHome {
-	// Model stub - Post/Reply entity classes handle data manipulation
+
+    // In-memory storage for replies (not persisted in database)
+    protected static ReplyCollection allReplies = new ReplyCollection();
 }

@@ -129,6 +129,8 @@ public class Database {
 	    statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS otp VARCHAR(255)");
 	    statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS otpExpiresAt BIGINT");
 	    statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS mustResetOnNextLogin BOOL DEFAULT FALSE");
+	    statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS newStudent BOOL DEFAULT FALSE");
+
 	}
 
 
@@ -187,8 +189,8 @@ public class Database {
  */
 	public void register(User user) throws SQLException {
 		String insertUser = "INSERT INTO userDB (userName, password, firstName, middleName, "
-				+ "lastName, preferredFirstName, emailAddress, adminRole, newRole1, newRole2) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "lastName, preferredFirstName, emailAddress, adminRole, newRole1, newRole2, newStudent) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
 			currentUsername = user.getUserName();
 			pstmt.setString(1, currentUsername);
@@ -331,6 +333,32 @@ public class Database {
 		return false;
 	}
 	
+	/*******
+	 * <p> Method: boolean loginRole2(User user) </p>
+	 * 
+	 * <p> Description: Check to see that a user with the specified username, password, and role
+	 * 		is the same as a row in the table for the username, password, and role. </p>
+	 * 
+	 * @param user specifies the specific user that should be logged in playing the Reviewer role.
+	 * 
+	 * @return true if the specified user has been logged in as an Student else false.
+	 * 
+	 */
+	// Validates a reviewer user's login credentials.
+	public boolean loginStudent(User user) {
+		String query = "SELECT * FROM userDB WHERE userName = ? AND password = ? AND "
+				+ "newStudent = TRUE";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, user.getUserName());
+			pstmt.setString(2, user.getPassword());
+			ResultSet rs = pstmt.executeQuery();
+			return rs.next();
+		} catch  (SQLException e) {
+		       e.printStackTrace();
+		}
+		return false;
+	}
+	
 	
 	/*******
 	 * <p> Method: boolean doesUserExist(User user) </p>
@@ -377,6 +405,7 @@ public class Database {
 		if (user.getAdminRole()) numberOfRoles++;
 		if (user.getNewRole1()) numberOfRoles++;
 		if (user.getNewRole2()) numberOfRoles++;
+		if (user.getNewStudent()) numberOfRoles++;
 		return numberOfRoles;
 	}	
 
@@ -951,27 +980,41 @@ public class Database {
 	 *  
 	 */
 	// get the attributes for a specified user
+
 	public boolean getUserAccountDetails(String username) {
-		String query = "SELECT * FROM userDB WHERE username = ?";
-		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-			pstmt.setString(1, username);
-	        ResultSet rs = pstmt.executeQuery();			
-			rs.next();
-	    	currentUsername = rs.getString(2);
-	    	currentPassword = rs.getString(3);
-	    	currentFirstName = rs.getString(4);
-	    	currentMiddleName = rs.getString(5);
-	    	currentLastName = rs.getString(6);
-	    	currentPreferredFirstName = rs.getString(7);
-	    	currentEmailAddress = rs.getString(8);
-	    	currentAdminRole = rs.getBoolean(9);
-	    	currentNewRole1 = rs.getBoolean(10);
-	    	currentNewRole2 = rs.getBoolean(11);
-	    	currentNewStudent = rs.getBoolean(12);
-			return true;
+	    String query = "SELECT userName, password, firstName, middleName, lastName, preferredFirstName, "
+	                 + "emailAddress, adminRole, newRole1, newRole2, newStudent "
+	                 + "FROM userDB WHERE userName = ?";
+	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        pstmt.setString(1, username);
+	        ResultSet rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            currentUsername = rs.getString("userName");
+	            currentPassword = rs.getString("password");
+	            currentFirstName = rs.getString("firstName");
+	            currentMiddleName = rs.getString("middleName");
+	            currentLastName = rs.getString("lastName");
+	            currentPreferredFirstName = rs.getString("preferredFirstName");
+	            currentEmailAddress = rs.getString("emailAddress");
+	            currentAdminRole = rs.getBoolean("adminRole");
+	            currentNewRole1 = rs.getBoolean("newRole1");
+	            currentNewRole2 = rs.getBoolean("newRole2");
+	            currentNewStudent = rs.getBoolean("newStudent");
+
+	            // Optional debug line:
+	            System.out.println("*** Fetching account data for user: " + username);
+	            System.out.println("    Admin: " + currentAdminRole
+	                             + ", Role1: " + currentNewRole1
+	                             + ", Role2: " + currentNewRole2
+	                             + ", Student: " + currentNewStudent);
+	            return true;
+	        }
 	    } catch (SQLException e) {
-			return false;
+	        System.err.println("*** ERROR in getUserAccountDetails for user: " + username);
+	        e.printStackTrace();
 	    }
+	    return false;
 	}
 	
 	
@@ -1039,19 +1082,19 @@ public class Database {
 		}
 		
 		if (role.compareTo("Student") == 0) {
-			String query = "UPDATE userDB SET newRole1 = ? WHERE username = ?";
-			try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-				pstmt.setString(1, value);
-				pstmt.setString(2, username);
-				pstmt.executeUpdate();
-				if (value.compareTo("true") == 0)
-					currentNewStudent = true;
-				else
-					currentNewStudent = false;
-				return true;
-			} catch (SQLException e) {
-				return false;
-			}
+		    String query = "UPDATE userDB SET newStudent = ? WHERE username = ?";
+		    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+		        pstmt.setString(1, value);
+		        pstmt.setString(2, username);
+		        pstmt.executeUpdate();
+		        if (value.compareTo("true") == 0)
+		            currentNewStudent = true;
+		        else
+		            currentNewStudent = false;
+		        return true;
+		    } catch (SQLException e) {
+		        return false;
+		    }
 		}
 		
 		return false;
@@ -1135,7 +1178,7 @@ public class Database {
 	            boolean rAdmin = rs.getBoolean("adminRole");
 	            boolean r1 = rs.getBoolean("newRole1");
 	            boolean r2 = rs.getBoolean("newRole2");
-	            boolean r3 = rs.getBoolean("Student");
+	            boolean r3 = rs.getBoolean("newStudent");
 	            
 	            entityClasses.User u = new entityClasses.User(
 	                userName, password, fn, mn, ln, pfn, email, rAdmin, r1, r2, r3

@@ -42,6 +42,9 @@ public class ViewAddRemoveRoles {
 	private static double width = applicationMain.FoundationsMain.WINDOW_WIDTH;
 	private static double height = applicationMain.FoundationsMain.WINDOW_HEIGHT;
 
+	// ✅ Add this array to define available roles (now includes Student)
+	protected static String[] roles = {"Admin", "Role1", "Role2", "Student"};
+
 	
 	// These are the widget attributes for the GUI. There are 3 areas for this GUI.
 	
@@ -206,6 +209,10 @@ public class ViewAddRemoveRoles {
 			{ControllerAddRemoveRoles.performRemoveRole(); });
 		setupLabelUI(label_SelectRoleToBeRemoved, "Arial", 20, 300, Pos.BASELINE_LEFT, 20, 280);	
 		setupComboBoxUI(combobox_SelectRoleToRemove, "Dialog", 16, 150, 280, 275);	
+
+		// ✅ Populate the dropdowns with available roles (includes Student)
+		combobox_SelectRoleToAdd.setItems(FXCollections.observableArrayList(roles));
+		combobox_SelectRoleToRemove.setItems(FXCollections.observableArrayList(roles));
 		
 		// GUI Area 3		
 		setupButtonUI(button_Return, "Dialog", 18, 210, Pos.CENTER, 20, 540);
@@ -221,7 +228,6 @@ public class ViewAddRemoveRoles {
 		
 		// Due to the very dynamic nature of this page, setting the widget into the Root Pane has 
 		// has been delegated to the repaintTheWindow and doSelectUser controller methods.
-		// Don't follow this pattern if formatting of the page does not change dynamically.
 	}	
 
 	/*-*******************************************************************************************
@@ -230,18 +236,6 @@ public class ViewAddRemoveRoles {
 	
 	*/
 
-	/**********
-	 * Private local method to initialize the standard fields for a label
-	 * 
-	 * @param l		The Label object to be initialized
-	 * @param ff	The font to be used
-	 * @param f		The size of the font to be used
-	 * @param w		The width of the Button
-	 * @param p		The alignment (e.g. left, centered, or right)
-	 * @param x		The location from the left edge (x axis)
-	 * @param y		The location from the top (y axis)
-	 */
-	
 	private static void setupLabelUI(Label l, String ff, double f, double w, Pos p, double x,
 			double y){
 		l.setFont(Font.font(ff, f));
@@ -251,18 +245,6 @@ public class ViewAddRemoveRoles {
 		l.setLayoutY(y);		
 	}
 	
-	
-	/**********
-	 * Private local method to initialize the standard fields for a button
-	 * 
-	 * @param b		The Button object to be initialized
-	 * @param ff	The font to be used
-	 * @param f		The size of the font to be used
-	 * @param w		The width of the Button
-	 * @param p		The alignment (e.g. left, centered, or right)
-	 * @param x		The location from the left edge (x axis)
-	 * @param y		The location from the top (y axis)
-	 */
 	protected static void setupButtonUI(Button b, String ff, double f, double w, Pos p, double x,
 			double y){
 		b.setFont(Font.font(ff, f));
@@ -272,16 +254,6 @@ public class ViewAddRemoveRoles {
 		b.setLayoutY(y);		
 	}
 
-	/**********
-	 * Private local method to initialize the standard fields for a ComboBox
-	 * 
-	 * @param c		The ComboBox object to be initialized
-	 * @param ff	The font to be used
-	 * @param f		The size of the font to be used
-	 * @param w		The width of the ComboBox
-	 * @param x		The location from the left edge (x axis)
-	 * @param y		The location from the top (y axis)
-	 */
 	protected static void setupComboBoxUI(ComboBox <String> c, String ff, double f, double w,
 			double x, double y){
 		c.setStyle("-fx-font: " + f + " " + ff + ";");
